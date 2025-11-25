@@ -6,15 +6,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
 
 /**
  * This class will contain four utility functions on lists and maps, of which the first one is provided as example.
@@ -61,10 +59,12 @@ public final class LambdaUtilities {
      *         otherwise.
      */
     public static <T> List<Optional<T>> optFilter(final List<T> list, final Predicate<T> pre) {
-        /*
-         * Suggestion: consider Optional.filter
-         */
-        return emptyList();
+        final List<Optional<T>> newList = new ArrayList<>();
+        list.forEach(t -> {
+            final Optional<T> opt = Optional.of(t);
+            newList.add(opt.filter(pre));
+        });
+        return newList;
     }
 
     /**
@@ -83,7 +83,14 @@ public final class LambdaUtilities {
         /*
          * Suggestion: consider Map.merge
          */
-        return emptyMap();
+        final Map<R, Set<T>> newMap = new HashMap<>();
+        list.forEach(t -> {
+            newMap.merge(op.apply(t), new TreeSet<>(Set.of(t)), (previousSet, nSet) -> {
+                previousSet.addAll(nSet);
+                return previousSet;
+            });
+        });
+        return newMap;
     }
 
     /**
@@ -104,7 +111,9 @@ public final class LambdaUtilities {
          *
          * Keep in mind that a map can be iterated through its forEach method
          */
-        return emptyMap();
+        final Map<K, V> newMap = new HashMap<>();
+        map.forEach((key, value) -> newMap.put(key, value.orElse(def.get())));
+        return newMap;
     }
 
     /**
